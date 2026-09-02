@@ -184,6 +184,18 @@ def clean_direct_records(records: list[dict], commodity_name: str) -> pd.DataFra
     # dataset you'll join against (NOAA, Census, TIGER shapefiles).
     df["county_fips"] = df["state_fips_code"].str.zfill(2) + df["county_code"].str.zfill(3)
 
+    # NASS reserves county_code "998" as a synthetic "OTHER (COMBINED)
+    # COUNTIES" pseudo-county: when individual small counties' data is
+    # disclosure-suppressed, NASS sometimes still publishes their SUM
+    # under this fake FIPS code rather than dropping it entirely. It
+    # doesn't correspond to any real geography (no centroid, no weather
+    # station mapping possible) and blends multiple counties' yields
+    # into one row, so it must never reach per-county modeling.
+    n_before = len(df)
+    df = df[~df["county_code"].str.zfill(3).eq("998")]
+    if n_before != len(df):
+        logger.info(f"  dropped {n_before - len(df)} 'OTHER (COMBINED) COUNTIES' pseudo-county rows (county_code=998)")
+
     # NASS uses "Value" as a string and marks suppressed/withheld data with
     # non-numeric placeholders (e.g. "(D)" for disclosure-suppressed).
     # Coercing to numeric and dropping NaNs removes those cleanly.
@@ -224,6 +236,10 @@ def fetch_wheat_class_component(stat: str, wheat_class: str, year: int) -> pd.Da
 
     df = pd.DataFrame(records)
     df["county_fips"] = df["state_fips_code"].str.zfill(2) + df["county_code"].str.zfill(3)
+    # Same "998 = OTHER (COMBINED) COUNTIES" pseudo-county issue as the
+    # direct path — must be excluded here too, since this function feeds
+    # the derived wheat yield the same way.
+    df = df[~df["county_code"].str.zfill(3).eq("998")]
     df["value"] = pd.to_numeric(df["Value"].str.replace(",", ""), errors="coerce")
     df = df.dropna(subset=["value"])
 
