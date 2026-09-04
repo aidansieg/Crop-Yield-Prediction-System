@@ -172,7 +172,7 @@ The anomaly feature space is multivariate (model disagreement, climate deviation
 **Why PostgreSQL instead of just CSVs?**
 The dashboard's API queries benefit from indexed lookups and aggregations. A county history query that would scan a 800K-row CSV in seconds runs in milliseconds against a properly indexed table.
 
-****
+**Why Data Folder is not tracked?**
 Data/ is not tracked — regenerate it by running the scripts in src/ in order (Steps 1→6). GitHub hard-caps files at 100MB, and climate_daily.parquet (363MB) is way over that.
 
 ---
