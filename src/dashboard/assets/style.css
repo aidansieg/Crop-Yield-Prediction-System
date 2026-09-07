@@ -1,0 +1,237 @@
+/* ============================================================
+   Crop Yield Monitor — dense-utility restyle
+   Reference: risk-analyst / trading-desk tooling (Bloomberg,
+   Grafana, USDA QuickStats), not a marketing dashboard.
+   No gradients, no shadows, no rounded cards, nothing centered.
+   ============================================================ */
+
+   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+   :root {
+     --ink: #16181c;
+     --ink-soft: #52565f;
+     --paper: #fafaf8;
+     --panel: #ffffff;
+     --line: #d8d8d3;
+     --line-strong: #16181c;
+     --accent: #a8331f;       /* anomaly/alert only — never decorative */
+     --accent-soft: #f3e3df;
+     --mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+     --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+   }
+   
+   * { box-sizing: border-box; }
+   
+   body {
+     background: var(--paper);
+     color: var(--ink);
+     font-family: var(--sans);
+     margin: 0;
+     -webkit-font-smoothing: antialiased;
+   }
+   
+   /* ---------- shell: sidebar + main, asymmetric, no centering ---------- */
+   
+   .app-shell {
+     display: grid;
+     grid-template-columns: 248px 1fr;
+     min-height: 100vh;
+   }
+   
+   .sidebar {
+     border-right: 1px solid var(--line);
+     padding: 24px 20px;
+     background: var(--panel);
+   }
+   
+   .main {
+     padding: 24px 32px 48px;
+   }
+   
+   /* ---------- sidebar contents ---------- */
+   
+   .brand {
+     font-family: var(--mono);
+     font-size: 12px;
+     font-weight: 600;
+     letter-spacing: 0.06em;
+     text-transform: uppercase;
+     color: var(--ink);
+     margin: 0 0 4px;
+   }
+   
+   .brand-sub {
+     font-size: 11px;
+     color: var(--ink-soft);
+     margin: 0 0 28px;
+     line-height: 1.5;
+   }
+   
+   .section-label {
+     font-family: var(--mono);
+     font-size: 10px;
+     font-weight: 600;
+     letter-spacing: 0.1em;
+     text-transform: uppercase;
+     color: var(--ink-soft);
+     margin: 0 0 10px;
+     border-bottom: 1px solid var(--line);
+     padding-bottom: 6px;
+   }
+   
+   .control-block {
+     margin-bottom: 18px;
+   }
+   
+   .control-label {
+     display: block;
+     font-size: 11px;
+     font-weight: 500;
+     color: var(--ink-soft);
+     margin-bottom: 4px;
+   }
+   
+   .sidebar-footnote {
+     font-size: 10.5px;
+     color: var(--ink-soft);
+     line-height: 1.6;
+     margin-top: 32px;
+     padding-top: 16px;
+     border-top: 1px solid var(--line);
+   }
+   
+   /* ---------- Dash Dropdown override: flat, bordered, no rounded pill ---------- */
+   
+   .Select-control, .Select--single > .Select-control {
+     border: 1px solid var(--line-strong) !important;
+     border-radius: 0 !important;
+     min-height: 32px !important;
+     box-shadow: none !important;
+     background: var(--panel) !important;
+   }
+   
+   .Select-value-label, .Select-placeholder, .VirtualizedSelectOption {
+     font-family: var(--sans) !important;
+     font-size: 13px !important;
+     color: var(--ink) !important;
+   }
+   
+   .is-focused > .Select-control {
+     border-color: var(--accent) !important;
+     box-shadow: none !important;
+   }
+   
+   .Select-menu-outer {
+     border: 1px solid var(--line-strong) !important;
+     border-radius: 0 !important;
+     box-shadow: none !important;
+     font-family: var(--sans) !important;
+     font-size: 13px !important;
+   }
+   
+   /* ---------- main header ---------- */
+   
+   .page-header {
+     margin-bottom: 20px;
+     padding-bottom: 16px;
+     border-bottom: 2px solid var(--line-strong);
+   }
+   
+   .page-title {
+     font-size: 22px;
+     font-weight: 700;
+     margin: 0 0 4px;
+     letter-spacing: -0.01em;
+   }
+   
+   .page-subtitle {
+     font-size: 13px;
+     color: var(--ink-soft);
+     margin: 0;
+     max-width: 640px;
+     line-height: 1.5;
+   }
+   
+   /* ---------- panels: flat, bordered, labeled — no shadow, no radius ---------- */
+   
+   .panel {
+     border: 1px solid var(--line-strong);
+     background: var(--panel);
+     margin-bottom: 24px;
+   }
+   
+   .panel-header {
+     font-family: var(--mono);
+     font-size: 10.5px;
+     font-weight: 600;
+     letter-spacing: 0.08em;
+     text-transform: uppercase;
+     padding: 10px 14px;
+     border-bottom: 1px solid var(--line);
+     color: var(--ink-soft);
+     display: flex;
+     justify-content: space-between;
+   }
+   
+   .panel-body {
+     padding: 4px;
+   }
+   
+   .panel-row {
+     display: grid;
+     grid-template-columns: 1.15fr 1fr;
+     gap: 0;
+   }
+   
+   .panel-row .panel {
+     margin-bottom: 0;
+   }
+   
+   .panel-row .panel:first-child {
+     border-right: none;
+   }
+   
+   /* ---------- anomaly table: dense, tabular numerals, no zebra gradient ---------- */
+   
+   .dash-table-container .dash-spreadsheet-container {
+     font-family: var(--sans) !important;
+   }
+   
+   .dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner table {
+     font-size: 12.5px !important;
+   }
+   
+   .dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner th {
+     font-family: var(--mono) !important;
+     font-size: 10px !important;
+     font-weight: 600 !important;
+     letter-spacing: 0.05em !important;
+     text-transform: uppercase !important;
+     color: var(--ink-soft) !important;
+     background: var(--paper) !important;
+     border-bottom: 1px solid var(--line-strong) !important;
+     border-top: none !important;
+     border-left: none !important;
+     border-right: none !important;
+     text-align: left !important;
+     padding: 8px 10px !important;
+   }
+   
+   .dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner td {
+     font-family: var(--mono) !important;
+     border: none !important;
+     border-bottom: 1px solid var(--line) !important;
+     padding: 6px 10px !important;
+   }
+   
+   .dash-table-container .row-1 { background: var(--paper) !important; }
+   .dash-table-container .row-0 { background: var(--panel) !important; }
+   
+   /* ---------- small utility caption text used above the map ---------- */
+   
+   .map-caption {
+     font-family: var(--mono);
+     font-size: 11px;
+     color: var(--ink-soft);
+     padding: 8px 14px 0;
+   }
