@@ -227,11 +227,62 @@
    .dash-table-container .row-1 { background: var(--paper) !important; }
    .dash-table-container .row-0 { background: var(--panel) !important; }
    
-   /* ---------- small utility caption text used above the map ---------- */
+   /* ---------- collapsible "About" panel — native <details>, no JS,
+      no new routes, sidesteps the Starlette/Dash mount-routing risk
+      entirely. Collapsed by default so repeat users aren't slowed down;
+      discoverable via the visible summary bar. ---------- */
    
-   .map-caption {
+   .about-details {
+     border: 1px solid var(--line-strong);
+     background: var(--panel);
+     margin-bottom: 20px;
+   }
+   
+   .about-details > summary {
+     cursor: pointer;
+     list-style: none;
      font-family: var(--mono);
-     font-size: 11px;
+     font-size: 10.5px;
+     font-weight: 600;
+     letter-spacing: 0.08em;
+     text-transform: uppercase;
      color: var(--ink-soft);
-     padding: 8px 14px 0;
+     padding: 10px 14px;
+   }
+   
+   .about-details > summary::-webkit-details-marker {
+     display: none;
+   }
+   
+   .about-details > summary::before {
+     content: "+  ";
+   }
+   
+   .about-details[open] > summary {
+     border-bottom: 1px solid var(--line);
+   }
+   
+   .about-details[open] > summary::before {
+     content: "\2212  ";
+   }
+   
+   .about-body {
+     padding: 14px 16px 16px;
+     font-size: 13px;
+     line-height: 1.6;
+     color: var(--ink);
+     max-width: 720px;
+   }
+   
+   .about-body p {
+     margin: 0 0 10px;
+   }
+   
+   .about-body ol {
+     margin: 0 0 4px;
+     padding-left: 20px;
+   }
+   
+   .about-body li {
+     margin-bottom: 6px;
    }
