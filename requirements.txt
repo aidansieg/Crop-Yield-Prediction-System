@@ -59,6 +59,8 @@ dash-bootstrap-components>=1.5.0
 # Utilities
 python-dotenv>=1.0.0
 tqdm>=4.66.1
-pytest>=7.4.3fastapi>=0.115.0
+pytest>=7.4.3
+fastapi>=0.115.0
 uvicorn>=0.30.0
 dash>=2.17.0
+a2wsgi>=1.10.0

@@ -47,7 +47,8 @@ COLOR_METRIC_OPTIONS = {
 def load_counties_geojson() -> dict:
     """Cache the US counties GeoJSON locally after first fetch — county
     boundaries are static reference data, no reason to re-download on
-    every app restart."""
+    every app restart. Safe to fetch at import time: this hits an
+    external URL, not our own API, so there's no startup-ordering risk."""
     if GEOJSON_CACHE_PATH.exists():
         with open(GEOJSON_CACHE_PATH) as f:
             return json.load(f)
@@ -70,23 +71,43 @@ def fetch_commodities() -> list:
 
 
 COUNTIES_GEOJSON = load_counties_geojson()
-COMMODITIES = fetch_commodities()
 
-app = Dash(__name__)
+app = Dash(
+    __name__,
+    # Starlette's Mount STRIPS the "/dashboard" prefix before forwarding
+    # to this app, so Dash's own Flask routes must be registered WITHOUT
+    # it (routes_pathname_prefix, left at its default "/") — otherwise
+    # nothing matches the already-stripped incoming path. But the browser
+    # still needs to be told to request assets/callbacks AT "/dashboard/"
+    # (requests_pathname_prefix) so those follow-up requests correctly
+    # route back through the Mount in the first place. Using
+    # url_base_pathname (which sets both to the SAME prefixed value) is
+    # what caused the 404: Dash's own routes then expected a prefix that
+    # Starlette had already removed.
+    requests_pathname_prefix=os.getenv("DASHBOARD_REQUESTS_PATHNAME_PREFIX", "/"),
+)
 app.title = "Crop Yield Prediction Dashboard"
 
+# IMPORTANT: the commodity dropdown starts EMPTY here on purpose — no
+# fetch_commodities() call anywhere near layout construction. An earlier
+# version tried deferring that fetch by making app.layout a function,
+# assuming Dash would only call it once a real page was requested. It
+# doesn't: Dash's `layout` setter eagerly invokes the function once,
+# immediately, to validate it — which still happens at import time,
+# before the merged app (see src/server.py) is listening on any port at
+# all. The fix is to never call our own API anywhere layout is built;
+# only from inside an actual Dash callback (see load_commodities below),
+# since callbacks by definition only ever run in response to a real
+# browser request hitting an already-running server.
 app.layout = html.Div([
+    dcc.Location(id="url-location", refresh=False),
+
     html.H1("County-Level Crop Yield Prediction"),
 
     html.Div([
         html.Div([
             html.Label("Commodity"),
-            dcc.Dropdown(
-                id="commodity-dropdown",
-                options=[{"label": c.title(), "value": c} for c in COMMODITIES],
-                value=COMMODITIES[0] if COMMODITIES else None,
-                clearable=False,
-            ),
+            dcc.Dropdown(id="commodity-dropdown", options=[], clearable=False),
         ], style={"width": "200px", "display": "inline-block", "marginRight": "20px"}),
 
         html.Div([
@@ -136,6 +157,24 @@ app.layout = html.Div([
 
     dcc.Store(id="selected-county-fips"),
 ])
+
+
+@app.callback(
+    Output("commodity-dropdown", "options"),
+    Output("commodity-dropdown", "value"),
+    Input("url-location", "pathname"),
+)
+def load_commodities(_pathname):
+    """
+    Fires exactly once when a browser first loads the page — dcc.Location's
+    pathname emits its initial value on page load, which by definition can
+    only happen after the server is already up and serving requests. This
+    is the safe place for the one HTTP call to our own API that a static
+    layout or an eagerly-evaluated layout function cannot make safely.
+    """
+    commodities = fetch_commodities()
+    options = [{"label": c.title(), "value": c} for c in commodities]
+    return options, (commodities[0] if commodities else None)
 
 
 @app.callback(
