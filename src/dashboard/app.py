@@ -150,6 +150,48 @@ app.layout = html.Div(className="app-shell", children=[
             ),
         ]),
 
+        html.Details(className="about-details", children=[
+            html.Summary("About This Tool"),
+            html.Div(className="about-body", children=[
+                html.P([
+                    html.Strong("What this is: "),
+                    "County-level yield forecasts for U.S. corn, soybean, and wheat "
+                    "production, built from USDA NASS survey history and NOAA climate "
+                    "records. Two independent models \u2014 a LightGBM regressor and a "
+                    "per-county Prophet trend model \u2014 are combined into a single "
+                    "ensemble prediction, with an Isolation Forest layer flagging "
+                    "counties where the actual reported yield deviated unexpectedly "
+                    "from what the models expected.",
+                ]),
+                html.P([
+                    html.Strong("Who it's for: "),
+                    "Anyone assessing crop yield risk at the county level \u2014 "
+                    "agricultural risk analysts, crop insurers, commodity desks, and "
+                    "lenders who need to spot under- or over-performing counties "
+                    "quickly, not just read a single national yield estimate.",
+                ]),
+                html.P(html.Strong("How to use it:")),
+                html.Ol([
+                    html.Li("Pick a commodity and year in the left sidebar."),
+                    html.Li(
+                        "Switch the map color mode to see predicted yield, actual "
+                        "yield, prediction error, or anomaly score for every "
+                        "reporting county that year."
+                    ),
+                    html.Li(
+                        "Click any county on the map, or select a row in the "
+                        "Flagged Anomalies table, to load its full year-by-year "
+                        "history in the County Trend panel."
+                    ),
+                    html.Li(
+                        "In the trend chart, red \u00d7 markers mark years flagged "
+                        "as anomalous \u2014 years where actual yield diverged "
+                        "meaningfully from the ensemble's forecast."
+                    ),
+                ]),
+            ]),
+        ]),
+
         html.Div(className="panel", children=[
             dcc.Graph(
                 id="choropleth-map",
@@ -354,15 +396,32 @@ def update_county_trend(county_fips, commodity):
     fig = px.line(
         df, x="year", y=["actual", "ensemble_pred"],
         labels={"value": "Yield (bu/acre)", "variable": "", "year": ""},
-        color_discrete_map={"actual": "#16181c", "ensemble_pred": "#5b7c99"},
+        color_discrete_map={"actual": "#16181c", "ensemble_pred": "#2b6cb0"},
     )
+    # Two ways to tell the lines apart, not just color: "actual" is the
+    # thicker solid line (ground truth), "ensemble_pred" is thinner and
+    # dashed (the model's estimate) — holds up even for colorblind users
+    # or a black-and-white printout, and the color contrast (near-black
+    # vs. a clear medium blue) is also much stronger than the previous
+    # near-black/muted-blue-gray pairing, which read as too similar.
+    LEGEND_NAMES = {"actual": "Actual", "ensemble_pred": "Predicted (ensemble)"}
+    fig.for_each_trace(lambda t: t.update(
+        name=LEGEND_NAMES.get(t.name, t.name),
+        line={"dash": "dash", "width": 2} if t.name == "ensemble_pred" else {"width": 2.5},
+    ))
     apply_dense_theme(fig, title=f"{commodity.title()} \u2014 County {county_fips}")
 
     anomalies = df[df["is_anomaly"] == True]  # noqa: E712 — explicit comparison needed, is_anomaly may be None
     if not anomalies.empty:
         fig.add_scatter(
             x=anomalies["year"], y=anomalies["actual"],
-            mode="markers", marker={"size": 10, "symbol": "x", "color": "#a8331f"},
+            mode="markers",
+            # Bright, saturated alert red — deliberately more vivid than
+            # the muted rust used elsewhere in the UI (--accent in
+            # style.css). A chart marker meant to grab attention earns
+            # more saturation than static chrome; everything else in
+            # the palette stays muted specifically so this pops.
+            marker={"size": 11, "symbol": "x", "color": "#e63946"},
             name="Anomaly",
         )
     return fig
