@@ -157,15 +157,15 @@ app.layout = html.Div(className="app-shell", children=[
                     html.Strong("What this is: "),
                     "County-level yield forecasts for U.S. corn, soybean, and wheat "
                     "production, built from USDA NASS survey history and NOAA climate "
-                    "records. Two independent models \u2014 a LightGBM regressor and a "
-                    "per-county Prophet trend model \u2014 are combined into a single "
+                    "records. Two independent models, a LightGBM regressor and a "
+                    "per-county Prophet trend model, are combined into a single "
                     "ensemble prediction, with an Isolation Forest layer flagging "
                     "counties where the actual reported yield deviated unexpectedly "
                     "from what the models expected.",
                 ]),
                 html.P([
                     html.Strong("Who it's for: "),
-                    "Anyone assessing crop yield risk at the county level \u2014 "
+                    "Anyone assessing crop yield risk at the county level; "
                     "agricultural risk analysts, crop insurers, commodity desks, and "
                     "lenders who need to spot under- or over-performing counties "
                     "quickly, not just read a single national yield estimate.",
@@ -185,7 +185,7 @@ app.layout = html.Div(className="app-shell", children=[
                     ),
                     html.Li(
                         "In the trend chart, red \u00d7 markers mark years flagged "
-                        "as anomalous \u2014 years where actual yield diverged "
+                        "as anomalous years where actual yield diverged "
                         "meaningfully from the ensemble's forecast."
                     ),
                 ]),
@@ -409,7 +409,7 @@ def update_county_trend(county_fips, commodity):
         name=LEGEND_NAMES.get(t.name, t.name),
         line={"dash": "dash", "width": 2} if t.name == "ensemble_pred" else {"width": 2.5},
     ))
-    apply_dense_theme(fig, title=f"{commodity.title()} \u2014 County {county_fips}")
+    apply_dense_theme(fig)
 
     anomalies = df[df["is_anomaly"] == True]  # noqa: E712 — explicit comparison needed, is_anomaly may be None
     if not anomalies.empty:
