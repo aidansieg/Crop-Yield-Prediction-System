@@ -2,9 +2,7 @@
 
 A county-level crop yield prediction system that ingests data from multiple public agricultural and climate sources, engineers 40+ features, trains an ensemble of ML models, and surfaces anomalies through an interactive dashboard.
 
-**Live demo:** `https://your-app.railway.app`
-
-![Dashboard screenshot](docs/dashboard_preview.png)
+**Live demo:** `https://app-service-production-fe7e.up.railway.app/dashboard/`
 
 ---
 
